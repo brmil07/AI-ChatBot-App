@@ -3,3 +3,5 @@ langchain-community == 0.2.12
 langchain-ollama == 0.1.1
 nltk == 3.8.1
 transformers == 4.44.2
+tk == 0.1.0
+pytest == 7.4.4

@@ -1,7 +1,10 @@
 import tkinter as tk
+import logging
 from tkinter import scrolledtext
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
+
+logging.basicConfig(filename='chatbot_app.log', level=logging.ERROR)
 
 
 class ChatbotApp:
@@ -18,7 +21,8 @@ class ChatbotApp:
         self.window_size = window_size
         self.root.title(self.window_title)
         self.root.geometry(self.window_size)
-        
+        self.context = "" # context can be managed to include chat history
+
         try:
             self.init_llm_model()
             self.create_widgets()
@@ -40,6 +44,7 @@ class ChatbotApp:
             self.prompt = ChatPromptTemplate.from_template(template)
             self.chain = self.prompt | self.llm_model
         except Exception as e:
+            logging.error(f"Failed to initialize the model: {e}")
             raise RuntimeError(f"Failed to initialize the model: {e}")
         
 
@@ -95,7 +100,6 @@ class ChatbotApp:
                 self.display_message("System", f"Error generating response: {e}", "system")
                 self.root.after(1000, self.root.quit)  
             self.user_input.delete(0, tk.END)
-
             if "exit" in message.lower():
                 self.root.quit()
 
@@ -162,16 +166,16 @@ class ChatbotApp:
             str: The LLM bot's response to the user's message.
         """
         user_input = message.lower()
-        context = ""  # Here, context can be managed to include chat history
         try:
-            result = self.chain.invoke({"context": context, "question": user_input})
-            context += f"\nUser: {user_input}\nAI: {result}"
+            result = self.chain.invoke({"context": self.context, "question": user_input})
+            self.context += f"\nUser: {user_input}\nAI: {result}"
             return result
         except Exception as e:
+            logging.error(f"Error generating response: {e}")
             return f"Error generating response: {e}"
 
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = ChatbotApp(root, model_name="phi3")
+    app = ChatbotApp(root, model_name="phi 3")
     root.mainloop()

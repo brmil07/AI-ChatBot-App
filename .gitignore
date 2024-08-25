@@ -163,3 +163,5 @@ cython_debug/
 
 # Ignore my private file
 note.txt
+Test-Red/
+AI_ChatBot_GUI_test.py
