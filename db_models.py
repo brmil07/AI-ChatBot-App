@@ -13,3 +13,4 @@ class ChatHistory(Base):
     sender = Column(String, nullable=False)        # "User" or "Bot"
     message = Column(Text, nullable=False)         # The actual message content
     timestamp = Column(DateTime, default=datetime.datetime.utcnow)  # Timestamp of the message
+    session_id = Column(Integer) 
