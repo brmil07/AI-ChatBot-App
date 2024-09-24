@@ -3,6 +3,7 @@ import logging
 from tkinter import scrolledtext
 from langchain_ollama import OllamaLLM
 from langchain_core.prompts import ChatPromptTemplate
+from chat_database import ChatDatabase
 
 logging.basicConfig(filename='chatbot_app.log', level=logging.ERROR)
 
@@ -23,10 +24,13 @@ class ChatbotApp:
         self.root.geometry(self.window_size)
         self.context = "" # context can be managed to include chat history
 
+        self.db = ChatDatabase()
+
         try:
             self.init_llm_model()
             self.create_widgets()
             self.display_welcome_message()
+            self.load_chat_history() 
         except Exception as e:
             self.display_message("System", f"Error initializing application: {e}", "system")
             self.root.after(1000, self.root.quit)  # Close the application after 1 second
@@ -94,8 +98,10 @@ class ChatbotApp:
         if message:
             try:
                 self.display_message("You", message, "you")
+                self.db.save_message("User", message)
                 bot_response = self.get_bot_response_llm(message)
                 self.display_message("Bot", bot_response, "bot")
+                self.db.save_message("Bot", bot_response)
             except Exception as e:
                 self.display_message("System", f"Error generating response: {e}", "system")
                 self.root.after(1000, self.root.quit)  
@@ -175,7 +181,14 @@ class ChatbotApp:
             return f"Error generating response: {e}"
 
 
+    def load_chat_history(self):
+        """Load previous chat history from the database and display it."""
+        chat_history = self.db.get_chat_history()
+        for entry in chat_history:
+            self.display_message(entry.sender, entry.message, "bot" if entry.sender == "Bot" else "you")
+
+
 if __name__ == "__main__":
     root = tk.Tk()
-    app = ChatbotApp(root, model_name="phi 3")
+    app = ChatbotApp(root, model_name="llama3.1")
     root.mainloop()
